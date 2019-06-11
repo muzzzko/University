@@ -1,0 +1,16 @@
+consumes:
+- application/json
+info:
+  title: Univers
+  version: 0.1.0
+produces:
+- application/json
+schemes:
+- http
+swagger: "2.0"
+paths:
+  /ping:
+    $ref: 'paths/ping.yml'
+
+
+

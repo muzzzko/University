@@ -1,0 +1,5 @@
+get:
+  description: healthcheck
+  responses:
+    204:
+      description: ok
