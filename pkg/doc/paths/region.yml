@@ -1,0 +1,18 @@
+get:
+  description: получение списка регионов
+  tags:
+    - region
+  operationId: getRegions
+  responses:
+    200:
+      description: успешное получение списка регионов
+      schema:
+        type: array
+        items:
+          $ref: 'definitions/region.yaml#/definitions/Region'
+    400:
+      description: неверный запрос
+      schema:
+        $ref: 'definitions/responses/error.yml#/definitions/ErrorResult'
+
+

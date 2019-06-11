@@ -1,0 +1,32 @@
+post:
+  description: аутентификация
+  tags:
+    - login
+  operationId: postLogin
+  parameters:
+    - name: body
+      in: body
+      schema:
+        type: object
+        required:
+          - api_key
+        properties:
+          api_key:
+            type: string
+            description: ключ администратора
+            x-nullable: false
+  responses:
+    200:
+      description: упешная аутентификация
+      schema:
+        type: object
+        required:
+          - token
+        properties:
+          token:
+            type: string
+            x-nullable: false
+    401:
+      description: неверный api key
+      schema:
+        $ref: 'definitions/responses/error.yml#/definitions/ErrorResult'

@@ -1,0 +1,147 @@
+definitions:
+  UniversityData:
+    type: object
+    description: данные университета
+    required:
+      - name
+      - address
+      - status
+      - shape
+      - rector
+      - region_id
+      - faculties
+      - student_number
+    properties:
+      name:
+        type: string
+        description: название университета
+        x-nullable: false
+      address:
+        type: string
+        description: адресс университета
+        x-nullable: false
+      status:
+        type: string
+        enum: ['state', 'commercial']
+        description: статус вуза
+        x-nullable: false
+      shape:
+        type: string
+        description: профиль вуза
+        example: "классический"
+        x-nullable: false
+      rector:
+        type: object
+        required:
+          - first_name
+          - family_name
+        properties:
+          first_name:
+            type: string
+            x-nullable: false
+          family_name:
+            type: string
+            x-nullable: false
+          patronymic:
+            type: string
+            x-nullable: false
+      region_id:
+        type: integer
+        x-nullable: false
+      faculties:
+        type: array
+        items:
+          type: object
+          required:
+            - name
+            - conditions
+          properties:
+            name:
+              type: string
+              x-nullable: false
+            conditions:
+              type: array
+              items:
+                type: string
+      student_number:
+        type: integer
+        description: кличество студентов
+        x-nullable: false
+  UniversityUpdateData:
+    type: object
+    description: данные университета
+    properties:
+      name:
+        type: string
+        description: название университета
+        x-nullable: false
+      address:
+        type: string
+        description: адресс университета
+        x-nullable: false
+      status:
+        type: string
+        enum: ['state', 'commercial']
+        description: статус вуза
+        x-nullable: false
+      shape:
+        type: string
+        description: профиль вуза
+        example: "классический"
+        x-nullable: false
+      rector:
+        type: object
+        required:
+          - id
+          - first_name
+          - family_name
+        properties:
+          id:
+            type: integer
+            x-nullable: false
+          first_name:
+            type: string
+            x-nullable: false
+          family_name:
+            type: string
+            x-nullable: false
+          patronymic:
+            type: string
+            x-nullable: false
+      region_id:
+        type: integer
+        x-nullable: false
+      faculties:
+        type: array
+        items:
+          type: object
+          required:
+            - name
+            - conditions
+          properties:
+            id:
+              type: integer
+              x-nullable: false
+            university_id:
+              type: integer
+              x-nullable: false
+            name:
+              type: string
+              x-nullable: false
+            conditions:
+              type: array
+              items:
+                type: object
+                required:
+                  - admission_condition
+                properties:
+                  id:
+                    type: integer
+                    x-nullable: false
+                  admission_condition:
+                    type: string
+                    x-nullable: false
+      student_number:
+        type: integer
+        description: кличество студентов
+        x-nullable: false

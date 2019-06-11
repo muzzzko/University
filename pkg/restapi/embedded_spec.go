@@ -33,8 +33,761 @@ func init() {
     "version": "0.1.0"
   },
   "paths": {
+    "/login": {
+      "post": {
+        "description": "аутентификация",
+        "tags": [
+          "login"
+        ],
+        "operationId": "postLogin",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/postLoginParamsBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "упешная аутентификация",
+            "schema": {
+              "$ref": "#/definitions/postLoginOKBody"
+            }
+          },
+          "401": {
+            "description": "неверный api key",
+            "schema": {
+              "$ref": "#/definitions/errorResult"
+            }
+          }
+        }
+      }
+    },
     "/ping": {
-      "$ref": "paths/ping.yml"
+      "get": {
+        "description": "healthcheck",
+        "responses": {
+          "204": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/regions": {
+      "get": {
+        "description": "получение списка регионов",
+        "tags": [
+          "region"
+        ],
+        "operationId": "getRegions",
+        "responses": {
+          "200": {
+            "description": "успешное получение списка регионов",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/region"
+              }
+            }
+          },
+          "400": {
+            "description": "неверный запрос",
+            "schema": {
+              "$ref": "#/definitions/errorResult"
+            }
+          }
+        }
+      }
+    },
+    "/universities": {
+      "get": {
+        "description": "Получить список университетов",
+        "tags": [
+          "university"
+        ],
+        "operationId": "getUniversities",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 0,
+            "x-nullable": false,
+            "name": "offset",
+            "in": "query"
+          },
+          {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer",
+            "default": 10,
+            "x-nullable": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "minimum": 1,
+            "type": "integer",
+            "name": "region_id",
+            "in": "query"
+          },
+          {
+            "enum": [
+              "state",
+              "commercial"
+            ],
+            "type": "string",
+            "name": "status",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "список университетов",
+            "schema": {
+              "$ref": "#/definitions/getUniversitiesOKBody"
+            }
+          },
+          "422": {
+            "description": "неверный запрос",
+            "schema": {
+              "$ref": "#/definitions/errorResult"
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "description": "добавить новый университет",
+        "tags": [
+          "university"
+        ],
+        "operationId": "postUniversity",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/universityData"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "университет успешно добавлен",
+            "schema": {
+              "$ref": "#/definitions/postUniversityOKBody"
+            }
+          },
+          "422": {
+            "description": "неверный запрос",
+            "schema": {
+              "$ref": "#/definitions/errorResult"
+            }
+          }
+        }
+      }
+    },
+    "/universities/{university_id}": {
+      "get": {
+        "description": "получение полной информации о вузе",
+        "tags": [
+          "university"
+        ],
+        "operationId": "getUniversity",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "идентификатор университета",
+            "name": "university_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "успешное получение информации",
+            "schema": {
+              "$ref": "#/definitions/university"
+            }
+          }
+        }
+      },
+      "patch": {
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "description": "обновить информацию об университете",
+        "tags": [
+          "university"
+        ],
+        "operationId": "patchUniversity",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "идентификатор университета",
+            "name": "university_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/universityUpdateData"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "успешное обновление информации об университете",
+            "schema": {
+              "$ref": "#/definitions/university"
+            }
+          },
+          "422": {
+            "description": "ошибка обновления",
+            "schema": {
+              "$ref": "#/definitions/errorResult"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "errorResult": {
+      "type": "object",
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "description": "код ошибки",
+          "type": "string",
+          "x-nullable": false
+        },
+        "message": {
+          "description": "описаниие ошибки",
+          "type": "string",
+          "x-nullable": false
+        }
+      }
+    },
+    "getUniversitiesOKBody": {
+      "type": "object",
+      "required": [
+        "count_university",
+        "universities"
+      ],
+      "properties": {
+        "count_university": {
+          "type": "integer",
+          "x-nullable": false
+        },
+        "universities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/getUniversitiesOKBodyUniversitiesItems"
+          }
+        }
+      },
+      "x-go-gen-location": "operations"
+    },
+    "getUniversitiesOKBodyUniversitiesItems": {
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "description": "идентификтора университета",
+          "type": "integer",
+          "x-nullable": false
+        },
+        "name": {
+          "description": "название университета",
+          "type": "string",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "operations"
+    },
+    "postLoginOKBody": {
+      "type": "object",
+      "required": [
+        "token"
+      ],
+      "properties": {
+        "token": {
+          "type": "string",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "operations"
+    },
+    "postLoginParamsBody": {
+      "type": "object",
+      "required": [
+        "api_key"
+      ],
+      "properties": {
+        "api_key": {
+          "description": "ключ администратора",
+          "type": "string",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "operations"
+    },
+    "postUniversityOKBody": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "description": "идентификатор нового университета",
+          "type": "integer",
+          "x-nullable": true
+        }
+      },
+      "x-go-gen-location": "operations"
+    },
+    "region": {
+      "description": "Регион",
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "description": "идентификатор региона",
+          "type": "integer",
+          "x-nullable": false
+        },
+        "name": {
+          "description": "название региона",
+          "type": "string",
+          "x-nullable": false
+        }
+      }
+    },
+    "university": {
+      "description": "данные университета",
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "address",
+        "status",
+        "shape",
+        "rector",
+        "region",
+        "faculties",
+        "student_number"
+      ],
+      "properties": {
+        "address": {
+          "description": "адресс университета",
+          "type": "string",
+          "x-nullable": false
+        },
+        "faculties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/universityFacultiesItems"
+          }
+        },
+        "id": {
+          "description": "идентификатор университета",
+          "type": "integer",
+          "x-nullable": false
+        },
+        "name": {
+          "description": "название университета",
+          "type": "string",
+          "x-nullable": false
+        },
+        "rector": {
+          "$ref": "#/definitions/universityRector"
+        },
+        "region": {
+          "$ref": "#/definitions/universityRegion"
+        },
+        "shape": {
+          "description": "профиль вуза",
+          "type": "string",
+          "x-nullable": false,
+          "example": "классический"
+        },
+        "status": {
+          "description": "статус вуза",
+          "type": "string",
+          "enum": [
+            "state",
+            "commercial"
+          ],
+          "x-nullable": false
+        },
+        "student_number": {
+          "description": "кличество студентов",
+          "type": "integer",
+          "x-nullable": false
+        }
+      }
+    },
+    "universityData": {
+      "description": "данные университета",
+      "type": "object",
+      "required": [
+        "name",
+        "address",
+        "status",
+        "shape",
+        "rector",
+        "region_id",
+        "faculties",
+        "student_number"
+      ],
+      "properties": {
+        "address": {
+          "description": "адресс университета",
+          "type": "string",
+          "x-nullable": false
+        },
+        "faculties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/universityDataFacultiesItems"
+          }
+        },
+        "name": {
+          "description": "название университета",
+          "type": "string",
+          "x-nullable": false
+        },
+        "rector": {
+          "$ref": "#/definitions/universityDataRector"
+        },
+        "region_id": {
+          "type": "integer",
+          "x-nullable": false
+        },
+        "shape": {
+          "description": "профиль вуза",
+          "type": "string",
+          "x-nullable": false,
+          "example": "классический"
+        },
+        "status": {
+          "description": "статус вуза",
+          "type": "string",
+          "enum": [
+            "state",
+            "commercial"
+          ],
+          "x-nullable": false
+        },
+        "student_number": {
+          "description": "кличество студентов",
+          "type": "integer",
+          "x-nullable": false
+        }
+      }
+    },
+    "universityDataFacultiesItems": {
+      "type": "object",
+      "required": [
+        "name",
+        "conditions"
+      ],
+      "properties": {
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "name": {
+          "type": "string",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "models"
+    },
+    "universityDataRector": {
+      "type": "object",
+      "required": [
+        "first_name",
+        "family_name"
+      ],
+      "properties": {
+        "family_name": {
+          "type": "string",
+          "x-nullable": false
+        },
+        "first_name": {
+          "type": "string",
+          "x-nullable": false
+        },
+        "patronymic": {
+          "type": "string",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "models"
+    },
+    "universityFacultiesItems": {
+      "description": "факультет",
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/universityFacultiesItemsConditionsItems"
+          }
+        },
+        "id": {
+          "description": "идентификатор факультета",
+          "type": "integer",
+          "x-nullable": false
+        },
+        "name": {
+          "description": "название факультета",
+          "type": "string",
+          "x-nullable": false
+        },
+        "university_id": {
+          "description": "идентификатор универсистета",
+          "type": "integer",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "models"
+    },
+    "universityFacultiesItemsConditionsItems": {
+      "description": "требование поступления на факультет",
+      "type": "object",
+      "required": [
+        "id",
+        "admission_condition",
+        "faculty_id"
+      ],
+      "properties": {
+        "admission_condition": {
+          "description": "условие поступления на факультет",
+          "type": "string",
+          "x-nullable": false
+        },
+        "faculty_id": {
+          "description": "идентификатор фкультета",
+          "type": "integer",
+          "x-nullable": false
+        },
+        "id": {
+          "description": "идентификатор требования поступления на факультет",
+          "type": "integer",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "models"
+    },
+    "universityRector": {
+      "description": "ректор университета",
+      "type": "object",
+      "required": [
+        "id",
+        "first_name",
+        "family_name"
+      ],
+      "properties": {
+        "family_name": {
+          "description": "фамилия ректора",
+          "type": "string",
+          "x-nullable": false
+        },
+        "first_name": {
+          "description": "имя ректора",
+          "type": "string",
+          "x-nullable": false
+        },
+        "id": {
+          "description": "идентификатор ректора",
+          "type": "integer",
+          "x-nullable": false
+        },
+        "patronymic": {
+          "description": "отчество ректора",
+          "type": "string",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "models"
+    },
+    "universityRegion": {
+      "description": "Регион",
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "description": "идентификатор региона",
+          "type": "integer",
+          "x-nullable": false
+        },
+        "name": {
+          "description": "название региона",
+          "type": "string",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "models"
+    },
+    "universityUpdateData": {
+      "description": "данные университета",
+      "type": "object",
+      "properties": {
+        "address": {
+          "description": "адресс университета",
+          "type": "string",
+          "x-nullable": false
+        },
+        "faculties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/universityUpdateDataFacultiesItems"
+          }
+        },
+        "name": {
+          "description": "название университета",
+          "type": "string",
+          "x-nullable": false
+        },
+        "rector": {
+          "$ref": "#/definitions/universityUpdateDataRector"
+        },
+        "region_id": {
+          "type": "integer",
+          "x-nullable": false
+        },
+        "shape": {
+          "description": "профиль вуза",
+          "type": "string",
+          "x-nullable": false,
+          "example": "классический"
+        },
+        "status": {
+          "description": "статус вуза",
+          "type": "string",
+          "enum": [
+            "state",
+            "commercial"
+          ],
+          "x-nullable": false
+        },
+        "student_number": {
+          "description": "кличество студентов",
+          "type": "integer",
+          "x-nullable": false
+        }
+      }
+    },
+    "universityUpdateDataFacultiesItems": {
+      "type": "object",
+      "required": [
+        "name",
+        "conditions"
+      ],
+      "properties": {
+        "conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/universityUpdateDataFacultiesItemsConditionsItems"
+          }
+        },
+        "id": {
+          "type": "integer",
+          "x-nullable": false
+        },
+        "name": {
+          "type": "string",
+          "x-nullable": false
+        },
+        "university_id": {
+          "type": "integer",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "models"
+    },
+    "universityUpdateDataFacultiesItemsConditionsItems": {
+      "type": "object",
+      "required": [
+        "admission_condition"
+      ],
+      "properties": {
+        "admission_condition": {
+          "type": "string",
+          "x-nullable": false
+        },
+        "id": {
+          "type": "integer",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "models"
+    },
+    "universityUpdateDataRector": {
+      "type": "object",
+      "required": [
+        "id",
+        "first_name",
+        "family_name"
+      ],
+      "properties": {
+        "family_name": {
+          "type": "string",
+          "x-nullable": false
+        },
+        "first_name": {
+          "type": "string",
+          "x-nullable": false
+        },
+        "id": {
+          "type": "integer",
+          "x-nullable": false
+        },
+        "patronymic": {
+          "type": "string",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "models"
+    }
+  },
+  "securityDefinitions": {
+    "JWT": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
     }
   }
 }`))
@@ -54,6 +807,38 @@ func init() {
     "version": "0.1.0"
   },
   "paths": {
+    "/login": {
+      "post": {
+        "description": "аутентификация",
+        "tags": [
+          "login"
+        ],
+        "operationId": "postLogin",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/postLoginParamsBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "упешная аутентификация",
+            "schema": {
+              "$ref": "#/definitions/postLoginOKBody"
+            }
+          },
+          "401": {
+            "description": "неверный api key",
+            "schema": {
+              "$ref": "#/definitions/errorResult"
+            }
+          }
+        }
+      }
+    },
     "/ping": {
       "get": {
         "description": "healthcheck",
@@ -63,6 +848,721 @@ func init() {
           }
         }
       }
+    },
+    "/regions": {
+      "get": {
+        "description": "получение списка регионов",
+        "tags": [
+          "region"
+        ],
+        "operationId": "getRegions",
+        "responses": {
+          "200": {
+            "description": "успешное получение списка регионов",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/region"
+              }
+            }
+          },
+          "400": {
+            "description": "неверный запрос",
+            "schema": {
+              "$ref": "#/definitions/errorResult"
+            }
+          }
+        }
+      }
+    },
+    "/universities": {
+      "get": {
+        "description": "Получить список университетов",
+        "tags": [
+          "university"
+        ],
+        "operationId": "getUniversities",
+        "parameters": [
+          {
+            "minimum": 0,
+            "type": "integer",
+            "default": 0,
+            "x-nullable": false,
+            "name": "offset",
+            "in": "query"
+          },
+          {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer",
+            "default": 10,
+            "x-nullable": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "minimum": 1,
+            "type": "integer",
+            "name": "region_id",
+            "in": "query"
+          },
+          {
+            "enum": [
+              "state",
+              "commercial"
+            ],
+            "type": "string",
+            "name": "status",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "список университетов",
+            "schema": {
+              "$ref": "#/definitions/getUniversitiesOKBody"
+            }
+          },
+          "422": {
+            "description": "неверный запрос",
+            "schema": {
+              "$ref": "#/definitions/errorResult"
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "description": "добавить новый университет",
+        "tags": [
+          "university"
+        ],
+        "operationId": "postUniversity",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/universityData"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "университет успешно добавлен",
+            "schema": {
+              "$ref": "#/definitions/postUniversityOKBody"
+            }
+          },
+          "422": {
+            "description": "неверный запрос",
+            "schema": {
+              "$ref": "#/definitions/errorResult"
+            }
+          }
+        }
+      }
+    },
+    "/universities/{university_id}": {
+      "get": {
+        "description": "получение полной информации о вузе",
+        "tags": [
+          "university"
+        ],
+        "operationId": "getUniversity",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "идентификатор университета",
+            "name": "university_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "успешное получение информации",
+            "schema": {
+              "$ref": "#/definitions/university"
+            }
+          }
+        }
+      },
+      "patch": {
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "description": "обновить информацию об университете",
+        "tags": [
+          "university"
+        ],
+        "operationId": "patchUniversity",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "идентификатор университета",
+            "name": "university_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/universityUpdateData"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "успешное обновление информации об университете",
+            "schema": {
+              "$ref": "#/definitions/university"
+            }
+          },
+          "422": {
+            "description": "ошибка обновления",
+            "schema": {
+              "$ref": "#/definitions/errorResult"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "errorResult": {
+      "type": "object",
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "description": "код ошибки",
+          "type": "string",
+          "x-nullable": false
+        },
+        "message": {
+          "description": "описаниие ошибки",
+          "type": "string",
+          "x-nullable": false
+        }
+      }
+    },
+    "getUniversitiesOKBody": {
+      "type": "object",
+      "required": [
+        "count_university",
+        "universities"
+      ],
+      "properties": {
+        "count_university": {
+          "type": "integer",
+          "x-nullable": false
+        },
+        "universities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/getUniversitiesOKBodyUniversitiesItems"
+          }
+        }
+      },
+      "x-go-gen-location": "operations"
+    },
+    "getUniversitiesOKBodyUniversitiesItems": {
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "description": "идентификтора университета",
+          "type": "integer",
+          "x-nullable": false
+        },
+        "name": {
+          "description": "название университета",
+          "type": "string",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "operations"
+    },
+    "postLoginOKBody": {
+      "type": "object",
+      "required": [
+        "token"
+      ],
+      "properties": {
+        "token": {
+          "type": "string",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "operations"
+    },
+    "postLoginParamsBody": {
+      "type": "object",
+      "required": [
+        "api_key"
+      ],
+      "properties": {
+        "api_key": {
+          "description": "ключ администратора",
+          "type": "string",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "operations"
+    },
+    "postUniversityOKBody": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "description": "идентификатор нового университета",
+          "type": "integer",
+          "x-nullable": true
+        }
+      },
+      "x-go-gen-location": "operations"
+    },
+    "region": {
+      "description": "Регион",
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "description": "идентификатор региона",
+          "type": "integer",
+          "x-nullable": false
+        },
+        "name": {
+          "description": "название региона",
+          "type": "string",
+          "x-nullable": false
+        }
+      }
+    },
+    "university": {
+      "description": "данные университета",
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "address",
+        "status",
+        "shape",
+        "rector",
+        "region",
+        "faculties",
+        "student_number"
+      ],
+      "properties": {
+        "address": {
+          "description": "адресс университета",
+          "type": "string",
+          "x-nullable": false
+        },
+        "faculties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/universityFacultiesItems"
+          }
+        },
+        "id": {
+          "description": "идентификатор университета",
+          "type": "integer",
+          "x-nullable": false
+        },
+        "name": {
+          "description": "название университета",
+          "type": "string",
+          "x-nullable": false
+        },
+        "rector": {
+          "$ref": "#/definitions/universityRector"
+        },
+        "region": {
+          "$ref": "#/definitions/universityRegion"
+        },
+        "shape": {
+          "description": "профиль вуза",
+          "type": "string",
+          "x-nullable": false,
+          "example": "классический"
+        },
+        "status": {
+          "description": "статус вуза",
+          "type": "string",
+          "enum": [
+            "state",
+            "commercial"
+          ],
+          "x-nullable": false
+        },
+        "student_number": {
+          "description": "кличество студентов",
+          "type": "integer",
+          "x-nullable": false
+        }
+      }
+    },
+    "universityData": {
+      "description": "данные университета",
+      "type": "object",
+      "required": [
+        "name",
+        "address",
+        "status",
+        "shape",
+        "rector",
+        "region_id",
+        "faculties",
+        "student_number"
+      ],
+      "properties": {
+        "address": {
+          "description": "адресс университета",
+          "type": "string",
+          "x-nullable": false
+        },
+        "faculties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/universityDataFacultiesItems"
+          }
+        },
+        "name": {
+          "description": "название университета",
+          "type": "string",
+          "x-nullable": false
+        },
+        "rector": {
+          "$ref": "#/definitions/universityDataRector"
+        },
+        "region_id": {
+          "type": "integer",
+          "x-nullable": false
+        },
+        "shape": {
+          "description": "профиль вуза",
+          "type": "string",
+          "x-nullable": false,
+          "example": "классический"
+        },
+        "status": {
+          "description": "статус вуза",
+          "type": "string",
+          "enum": [
+            "state",
+            "commercial"
+          ],
+          "x-nullable": false
+        },
+        "student_number": {
+          "description": "кличество студентов",
+          "type": "integer",
+          "x-nullable": false
+        }
+      }
+    },
+    "universityDataFacultiesItems": {
+      "type": "object",
+      "required": [
+        "name",
+        "conditions"
+      ],
+      "properties": {
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "name": {
+          "type": "string",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "models"
+    },
+    "universityDataRector": {
+      "type": "object",
+      "required": [
+        "first_name",
+        "family_name"
+      ],
+      "properties": {
+        "family_name": {
+          "type": "string",
+          "x-nullable": false
+        },
+        "first_name": {
+          "type": "string",
+          "x-nullable": false
+        },
+        "patronymic": {
+          "type": "string",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "models"
+    },
+    "universityFacultiesItems": {
+      "description": "факультет",
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/universityFacultiesItemsConditionsItems"
+          }
+        },
+        "id": {
+          "description": "идентификатор факультета",
+          "type": "integer",
+          "x-nullable": false
+        },
+        "name": {
+          "description": "название факультета",
+          "type": "string",
+          "x-nullable": false
+        },
+        "university_id": {
+          "description": "идентификатор универсистета",
+          "type": "integer",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "models"
+    },
+    "universityFacultiesItemsConditionsItems": {
+      "description": "требование поступления на факультет",
+      "type": "object",
+      "required": [
+        "id",
+        "admission_condition",
+        "faculty_id"
+      ],
+      "properties": {
+        "admission_condition": {
+          "description": "условие поступления на факультет",
+          "type": "string",
+          "x-nullable": false
+        },
+        "faculty_id": {
+          "description": "идентификатор фкультета",
+          "type": "integer",
+          "x-nullable": false
+        },
+        "id": {
+          "description": "идентификатор требования поступления на факультет",
+          "type": "integer",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "models"
+    },
+    "universityRector": {
+      "description": "ректор университета",
+      "type": "object",
+      "required": [
+        "id",
+        "first_name",
+        "family_name"
+      ],
+      "properties": {
+        "family_name": {
+          "description": "фамилия ректора",
+          "type": "string",
+          "x-nullable": false
+        },
+        "first_name": {
+          "description": "имя ректора",
+          "type": "string",
+          "x-nullable": false
+        },
+        "id": {
+          "description": "идентификатор ректора",
+          "type": "integer",
+          "x-nullable": false
+        },
+        "patronymic": {
+          "description": "отчество ректора",
+          "type": "string",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "models"
+    },
+    "universityRegion": {
+      "description": "Регион",
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "description": "идентификатор региона",
+          "type": "integer",
+          "x-nullable": false
+        },
+        "name": {
+          "description": "название региона",
+          "type": "string",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "models"
+    },
+    "universityUpdateData": {
+      "description": "данные университета",
+      "type": "object",
+      "properties": {
+        "address": {
+          "description": "адресс университета",
+          "type": "string",
+          "x-nullable": false
+        },
+        "faculties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/universityUpdateDataFacultiesItems"
+          }
+        },
+        "name": {
+          "description": "название университета",
+          "type": "string",
+          "x-nullable": false
+        },
+        "rector": {
+          "$ref": "#/definitions/universityUpdateDataRector"
+        },
+        "region_id": {
+          "type": "integer",
+          "x-nullable": false
+        },
+        "shape": {
+          "description": "профиль вуза",
+          "type": "string",
+          "x-nullable": false,
+          "example": "классический"
+        },
+        "status": {
+          "description": "статус вуза",
+          "type": "string",
+          "enum": [
+            "state",
+            "commercial"
+          ],
+          "x-nullable": false
+        },
+        "student_number": {
+          "description": "кличество студентов",
+          "type": "integer",
+          "x-nullable": false
+        }
+      }
+    },
+    "universityUpdateDataFacultiesItems": {
+      "type": "object",
+      "required": [
+        "name",
+        "conditions"
+      ],
+      "properties": {
+        "conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/universityUpdateDataFacultiesItemsConditionsItems"
+          }
+        },
+        "id": {
+          "type": "integer",
+          "x-nullable": false
+        },
+        "name": {
+          "type": "string",
+          "x-nullable": false
+        },
+        "university_id": {
+          "type": "integer",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "models"
+    },
+    "universityUpdateDataFacultiesItemsConditionsItems": {
+      "type": "object",
+      "required": [
+        "admission_condition"
+      ],
+      "properties": {
+        "admission_condition": {
+          "type": "string",
+          "x-nullable": false
+        },
+        "id": {
+          "type": "integer",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "models"
+    },
+    "universityUpdateDataRector": {
+      "type": "object",
+      "required": [
+        "id",
+        "first_name",
+        "family_name"
+      ],
+      "properties": {
+        "family_name": {
+          "type": "string",
+          "x-nullable": false
+        },
+        "first_name": {
+          "type": "string",
+          "x-nullable": false
+        },
+        "id": {
+          "type": "integer",
+          "x-nullable": false
+        },
+        "patronymic": {
+          "type": "string",
+          "x-nullable": false
+        }
+      },
+      "x-go-gen-location": "models"
+    }
+  },
+  "securityDefinitions": {
+    "JWT": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
     }
   }
 }`))

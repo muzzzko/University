@@ -1,0 +1,16 @@
+definitions:
+  Region:
+    description: Регион
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: integer
+        x-nullable: false
+        description: идентификатор региона
+      name:
+        type: string
+        x-nullable: false
+        description: название региона

@@ -18,6 +18,10 @@ import (
 	spec "github.com/go-openapi/spec"
 	strfmt "github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+
+	"univers/pkg/restapi/operations/login"
+	"univers/pkg/restapi/operations/region"
+	"univers/pkg/restapi/operations/university"
 )
 
 // NewUniversAPI creates a new Univers instance
@@ -40,6 +44,32 @@ func NewUniversAPI(spec *loads.Document) *UniversAPI {
 		GetPingHandler: GetPingHandlerFunc(func(params GetPingParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetPing has not yet been implemented")
 		}),
+		RegionGetRegionsHandler: region.GetRegionsHandlerFunc(func(params region.GetRegionsParams) middleware.Responder {
+			return middleware.NotImplemented("operation RegionGetRegions has not yet been implemented")
+		}),
+		UniversityGetUniversitiesHandler: university.GetUniversitiesHandlerFunc(func(params university.GetUniversitiesParams) middleware.Responder {
+			return middleware.NotImplemented("operation UniversityGetUniversities has not yet been implemented")
+		}),
+		UniversityGetUniversityHandler: university.GetUniversityHandlerFunc(func(params university.GetUniversityParams) middleware.Responder {
+			return middleware.NotImplemented("operation UniversityGetUniversity has not yet been implemented")
+		}),
+		UniversityPatchUniversityHandler: university.PatchUniversityHandlerFunc(func(params university.PatchUniversityParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation UniversityPatchUniversity has not yet been implemented")
+		}),
+		LoginPostLoginHandler: login.PostLoginHandlerFunc(func(params login.PostLoginParams) middleware.Responder {
+			return middleware.NotImplemented("operation LoginPostLogin has not yet been implemented")
+		}),
+		UniversityPostUniversityHandler: university.PostUniversityHandlerFunc(func(params university.PostUniversityParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation UniversityPostUniversity has not yet been implemented")
+		}),
+
+		// Applies when the "Authorization" header is set
+		JWTAuth: func(token string) (interface{}, error) {
+			return nil, errors.NotImplemented("api key auth (JWT) Authorization from header param [Authorization] has not yet been implemented")
+		},
+
+		// default authorizer is authorized meaning no requests are blocked
+		APIAuthorizer: security.Authorized(),
 	}
 }
 
@@ -71,8 +101,27 @@ type UniversAPI struct {
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 
+	// JWTAuth registers a function that takes a token and returns a principal
+	// it performs authentication based on an api key Authorization provided in the header
+	JWTAuth func(string) (interface{}, error)
+
+	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
+	APIAuthorizer runtime.Authorizer
+
 	// GetPingHandler sets the operation handler for the get ping operation
 	GetPingHandler GetPingHandler
+	// RegionGetRegionsHandler sets the operation handler for the get regions operation
+	RegionGetRegionsHandler region.GetRegionsHandler
+	// UniversityGetUniversitiesHandler sets the operation handler for the get universities operation
+	UniversityGetUniversitiesHandler university.GetUniversitiesHandler
+	// UniversityGetUniversityHandler sets the operation handler for the get university operation
+	UniversityGetUniversityHandler university.GetUniversityHandler
+	// UniversityPatchUniversityHandler sets the operation handler for the patch university operation
+	UniversityPatchUniversityHandler university.PatchUniversityHandler
+	// LoginPostLoginHandler sets the operation handler for the post login operation
+	LoginPostLoginHandler login.PostLoginHandler
+	// UniversityPostUniversityHandler sets the operation handler for the post university operation
+	UniversityPostUniversityHandler university.PostUniversityHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -136,8 +185,36 @@ func (o *UniversAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
+	if o.JWTAuth == nil {
+		unregistered = append(unregistered, "AuthorizationAuth")
+	}
+
 	if o.GetPingHandler == nil {
 		unregistered = append(unregistered, "GetPingHandler")
+	}
+
+	if o.RegionGetRegionsHandler == nil {
+		unregistered = append(unregistered, "region.GetRegionsHandler")
+	}
+
+	if o.UniversityGetUniversitiesHandler == nil {
+		unregistered = append(unregistered, "university.GetUniversitiesHandler")
+	}
+
+	if o.UniversityGetUniversityHandler == nil {
+		unregistered = append(unregistered, "university.GetUniversityHandler")
+	}
+
+	if o.UniversityPatchUniversityHandler == nil {
+		unregistered = append(unregistered, "university.PatchUniversityHandler")
+	}
+
+	if o.LoginPostLoginHandler == nil {
+		unregistered = append(unregistered, "login.PostLoginHandler")
+	}
+
+	if o.UniversityPostUniversityHandler == nil {
+		unregistered = append(unregistered, "university.PostUniversityHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -155,14 +232,24 @@ func (o *UniversAPI) ServeErrorFor(operationID string) func(http.ResponseWriter,
 // AuthenticatorsFor gets the authenticators for the specified security schemes
 func (o *UniversAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
 
-	return nil
+	result := make(map[string]runtime.Authenticator)
+	for name, scheme := range schemes {
+		switch name {
+
+		case "JWT":
+
+			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.JWTAuth)
+
+		}
+	}
+	return result
 
 }
 
 // Authorizer returns the registered authorizer
 func (o *UniversAPI) Authorizer() runtime.Authorizer {
 
-	return nil
+	return o.APIAuthorizer
 
 }
 
@@ -242,6 +329,36 @@ func (o *UniversAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/ping"] = NewGetPing(o.context, o.GetPingHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/regions"] = region.NewGetRegions(o.context, o.RegionGetRegionsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/universities"] = university.NewGetUniversities(o.context, o.UniversityGetUniversitiesHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/universities/{university_id}"] = university.NewGetUniversity(o.context, o.UniversityGetUniversityHandler)
+
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
+	o.handlers["PATCH"]["/universities/{university_id}"] = university.NewPatchUniversity(o.context, o.UniversityPatchUniversityHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/login"] = login.NewPostLogin(o.context, o.LoginPostLoginHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/universities"] = university.NewPostUniversity(o.context, o.UniversityPostUniversityHandler)
 
 }
 

@@ -8,9 +8,22 @@ produces:
 schemes:
 - http
 swagger: "2.0"
+securityDefinitions:
+  JWT:
+    type: apiKey
+    in: header
+    name: Authorization
 paths:
   /ping:
     $ref: 'paths/ping.yml'
+  /universities:
+    $ref: 'paths/universities.yml'
+  /universities/{university_id}:
+    $ref: 'paths/university.yml'
+  /login:
+    $ref: 'paths/login.yml'
+  /regions:
+    $ref: 'paths/region.yml'
 
 
 

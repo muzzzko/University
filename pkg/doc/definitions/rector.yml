@@ -1,0 +1,25 @@
+definitions:
+  Rector:
+    type: object
+    description: ректор университета
+    required:
+      - id
+      - first_name
+      - family_name
+    properties:
+      id:
+        type: integer
+        description: идентификатор ректора
+        x-nullable: false
+      first_name:
+        type: string
+        description: имя ректора
+        x-nullable: false
+      family_name:
+        type: string
+        description: фамилия ректора
+        x-nullable: false
+      patronymic:
+        type: string
+        description: отчество ректора
+        x-nullable: false

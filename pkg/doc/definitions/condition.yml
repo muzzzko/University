@@ -1,0 +1,21 @@
+definitions:
+  Condition:
+    type: object
+    description: требование поступления на факультет
+    required:
+      - id
+      - admission_condition
+      - faculty_id
+    properties:
+      id:
+        type: integer
+        description: идентификатор требования поступления на факультет
+        x-nullable: false
+      admission_condition:
+        type: string
+        description: условие поступления на факультет
+        x-nullable: false
+      faculty_id:
+        type: integer
+        description: идентификатор фкультета
+        x-nullable: false

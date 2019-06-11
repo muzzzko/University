@@ -1,0 +1,43 @@
+get:
+  description: получение полной информации о вузе
+  tags:
+    - university
+  operationId: getUniversity
+  parameters:
+    - name: university_id
+      in: path
+      required: true
+      description: идентификатор университета
+      type: integer
+  responses:
+    200:
+      description: успешное получение информации
+      schema:
+        $ref: 'definitions/responses/university.yml#/definitions/University'
+patch:
+  description: обновить информацию об университете
+  tags:
+    - university
+  operationId: patchUniversity
+  security:
+    - JWT: []
+  parameters:
+    - name: university_id
+      in: path
+      required: true
+      description: идентификатор университета
+      type: integer
+    - name: body
+      in: body
+      required: true
+      schema:
+        $ref: 'definitions/requests/university.yml#/definitions/UniversityUpdateData'
+  responses:
+    200:
+      description: успешное обновление информации об университете
+      schema:
+        $ref: 'definitions/responses/university.yml#/definitions/University'
+    422:
+      description: ошибка обновления
+      schema:
+        $ref: 'definitions/responses/error.yml#/definitions/ErrorResult'

@@ -1,0 +1,88 @@
+get:
+  description: Получить список университетов
+  tags:
+    - university
+  operationId: getUniversities
+  parameters:
+    - name: offset
+      in: query
+      type: integer
+      default: 0
+      x-nullable: false
+      minimum: 0
+    - name: limit
+      in: query
+      type: integer
+      default: 10
+      x-nullable: false
+      minimum: 1
+      maximum: 100
+    - name: region_id
+      in: query
+      type: integer
+      minimum: 1
+    - name: status
+      in: query
+      type: string
+      enum: ['state', 'commercial']
+  responses:
+    200:
+      description: список университетов
+      schema:
+        type: object
+        required:
+          - count_university
+          - universities
+        properties:
+          count_university:
+            type: integer
+            x-nullable: false
+          universities:
+            type: array
+            items:
+              type: object
+              required:
+                - id
+                - name
+              properties:
+                id:
+                  type: integer
+                  description: идентификтора университета
+                  x-nullable: false
+                name:
+                  type: string
+                  description: название университета
+                  x-nullable: false
+    422:
+      description: неверный запрос
+      schema:
+        $ref: 'definitions/responses/error.yml#/definitions/ErrorResult'
+post:
+  description: добавить новый университет
+  tags:
+    - university
+  operationId: postUniversity
+  security:
+    - JWT: []
+  parameters:
+    - name: body
+      in: body
+      required: true
+      schema:
+        $ref: 'definitions/requests/university.yml#/definitions/UniversityData'
+  responses:
+    200:
+      description: университет успешно добавлен
+      schema:
+        type: object
+        required:
+          - id
+        properties:
+          id:
+            type: integer
+            description: идентификатор нового университета
+            x-nullable: true
+    422:
+      description: неверный запрос
+      schema:
+        $ref: 'definitions/responses/error.yml#/definitions/ErrorResult'

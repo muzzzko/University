@@ -11,9 +11,12 @@ import (
 	middleware "github.com/go-openapi/runtime/middleware"
 
 	"univers/pkg/restapi/operations"
+	"univers/pkg/restapi/operations/login"
+	"univers/pkg/restapi/operations/region"
+	"univers/pkg/restapi/operations/university"
 )
 
-//go:generate swagger generate server --target ../../pkg --name Univers --spec ../../swagger.yml
+//go:generate swagger generate server --target ../../pkg --name Univers --spec ../../tmp/swagger.yaml --exclude-main
 
 func configureFlags(api *operations.UniversAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }
@@ -33,9 +36,49 @@ func configureAPI(api *operations.UniversAPI) http.Handler {
 
 	api.JSONProducer = runtime.JSONProducer()
 
+	// Applies when the "Authorization" header is set
+	api.JWTAuth = func(token string) (interface{}, error) {
+		return nil, errors.NotImplemented("api key auth (JWT) Authorization from header param [Authorization] has not yet been implemented")
+	}
+
+	// Set your custom authorizer if needed. Default one is security.Authorized()
+	// Expected interface runtime.Authorizer
+	//
+	// Example:
+	// api.APIAuthorizer = security.Authorized()
 	if api.GetPingHandler == nil {
 		api.GetPingHandler = operations.GetPingHandlerFunc(func(params operations.GetPingParams) middleware.Responder {
 			return middleware.NotImplemented("operation .GetPing has not yet been implemented")
+		})
+	}
+	if api.RegionGetRegionsHandler == nil {
+		api.RegionGetRegionsHandler = region.GetRegionsHandlerFunc(func(params region.GetRegionsParams) middleware.Responder {
+			return middleware.NotImplemented("operation region.GetRegions has not yet been implemented")
+		})
+	}
+	if api.UniversityGetUniversitiesHandler == nil {
+		api.UniversityGetUniversitiesHandler = university.GetUniversitiesHandlerFunc(func(params university.GetUniversitiesParams) middleware.Responder {
+			return middleware.NotImplemented("operation university.GetUniversities has not yet been implemented")
+		})
+	}
+	if api.UniversityGetUniversityHandler == nil {
+		api.UniversityGetUniversityHandler = university.GetUniversityHandlerFunc(func(params university.GetUniversityParams) middleware.Responder {
+			return middleware.NotImplemented("operation university.GetUniversity has not yet been implemented")
+		})
+	}
+	if api.UniversityPatchUniversityHandler == nil {
+		api.UniversityPatchUniversityHandler = university.PatchUniversityHandlerFunc(func(params university.PatchUniversityParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation university.PatchUniversity has not yet been implemented")
+		})
+	}
+	if api.LoginPostLoginHandler == nil {
+		api.LoginPostLoginHandler = login.PostLoginHandlerFunc(func(params login.PostLoginParams) middleware.Responder {
+			return middleware.NotImplemented("operation login.PostLogin has not yet been implemented")
+		})
+	}
+	if api.UniversityPostUniversityHandler == nil {
+		api.UniversityPostUniversityHandler = university.PostUniversityHandlerFunc(func(params university.PostUniversityParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation university.PostUniversity has not yet been implemented")
 		})
 	}
 

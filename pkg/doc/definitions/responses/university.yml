@@ -1,0 +1,53 @@
+definitions:
+  University:
+    type: object
+    description: данные университета
+    required:
+      - id
+      - name
+      - address
+      - status
+      - shape
+      - rector
+      - region
+      - faculties
+      - student_number
+    properties:
+      id:
+        type: integer
+        description: идентификатор университета
+        x-nullable: false
+      name:
+        type: string
+        description: название университета
+        x-nullable: false
+      address:
+        type: string
+        description: адресс университета
+        x-nullable: false
+      status:
+        type: string
+        enum: ['state', 'commercial']
+        description: статус вуза
+        x-nullable: false
+      shape:
+        type: string
+        description: профиль вуза
+        example: "классический"
+        x-nullable: false
+      rector:
+        $ref: '../rector.yml#/definitions/Rector'
+      region:
+        $ref: '../region.yaml#/definitions/Region'
+      faculties:
+        type: array
+        items:
+          $ref: '../faculty.yml#/definitions/Faculty'
+      student_number:
+        type: integer
+        description: кличество студентов
+        x-nullable: false
+
+
+
+
